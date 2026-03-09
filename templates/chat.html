@@ -1,0 +1,345 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>WhatsApp</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="{% static 'css/chat.css' %}">
+</head>
+<body>
+
+<div class="app {% if messages or other_user %}chat-open{% endif %}" id="app">
+
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <div class="app-title"> WhatsApp</div>
+      <a href="/logout/" class="logout-btn">Logout</a>
+    </div>
+
+    <div class="sidebar-search">
+      <form method="GET" action="/chat/{{ other_user.username }}/" class="search-form">
+        <span class="search-icon">🔍</span>
+        <input type="text" name="search" placeholder="Search or start chat..."
+               autocomplete="off" value="{{ search_query }}">
+        <button type="submit">Go</button>
+      </form>
+    </div>
+
+    <div class="contacts-label">
+      {% if search_query %}Results{% else %}Recent Chats{% endif %}
+    </div>
+
+    <div class="contacts" id="contacts-list">
+      {% if search_query %}
+        {% for item in search_results %}
+          <a href="/chat/{{ item.user.username }}/"
+             class="contact-item {% if item.user.username == other_user.username %}active{% endif %}"
+             data-user="{{ item.user.username }}">
+            <div class="contact-avatar">
+              {{ item.user.username|first|upper }}
+              <span class="online-dot {% if item.is_online %}online{% endif %}"></span>
+            </div>
+            <div class="contact-info">
+              <div class="contact-name">{{ item.user.username }}</div>
+              <div class="contact-status {% if item.is_online %}online{% else %}offline{% endif %} status">
+                {% if item.is_online %} Online{% else %} Offline{% endif %}
+              </div>
+            </div>
+          </a>
+        {% empty %}
+          <div class="no-contacts"><div class="icon">🔎</div>No users found</div>
+        {% endfor %}
+      {% else %}
+        {% for item in recent_chats %}
+          <a href="/chat/{{ item.user.username }}/"
+             class="contact-item {% if item.user.username == other_user.username %}active{% endif %}"
+             data-user="{{ item.user.username }}">
+            <div class="contact-avatar">
+              {{ item.user.username|first|upper }}
+              <span class="online-dot {% if item.is_online %}online{% endif %}"></span>
+            </div>
+            <div class="contact-info">
+              <div class="contact-name">{{ item.user.username }}</div>
+              <div class="contact-status {% if item.is_online %}online{% else %}offline{% endif %} status">
+                {% if item.is_online %} Online{% else %} Offline{% endif %}
+              </div>
+            </div>
+          </a>
+        {% empty %}
+          <div class="no-contacts"><div class="icon"></div>No chats yet.<br>Search for a friend!</div>
+        {% endfor %}
+      {% endif %}
+    </div>
+  </div>
+
+  <!--  CHAT PANEL -->
+  <div class="chat-panel">
+
+    {% if other_user %}
+
+    <!-- Header -->
+    <div class="chat-header">
+      <a href="/" class="mobile-back" id="mobile-back">&#8592;</a>
+      <div class="chat-avatar">{{ other_user.username|first|upper }}</div>
+      <div class="chat-header-info">
+        <div class="name">{{ other_user.username }}</div>
+        <div class="status" id="status-text">{{ last_seen }}</div>
+      </div>
+    </div>
+
+    <!-- Reconnect banner -->
+    <div class="conn-banner" id="conn-banner">⚠️ Connection lost — reconnecting...</div>
+
+    <!-- Messages -->
+    <div class="chat-box" id="chat-box">
+      {% for msg in messages %}
+        <div class="msg {% if msg.sender.username == request.user.username %}sent{% else %}received{% endif %}"
+             data-id="{{ msg.id }}">
+          {% if msg.sender.username != request.user.username %}
+            <div class="msg-name">{{ msg.sender.username }}</div>
+          {% endif %}
+          <div class="msg-content">{{ msg.content }}</div>
+          <div class="msg-footer">
+            <span class="time">{{ msg.timestamp|date:"h:i A" }}</span>
+            {% if msg.sender.username == request.user.username %}
+              <span class="tick {% if msg.is_read %}read{% endif %}">
+                {% if msg.is_read %}✓✓{% else %}✓{% endif %}
+              </span>
+            {% endif %}
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+
+    <!-- Input -->
+    <div class="input-area">
+      <div class="char-count" id="char-count"></div>
+      <div class="emoji-bar" id="emoji-bar">
+        <button class="emoji-btn">😀</button><button class="emoji-btn">😂</button>
+        <button class="emoji-btn">😍</button><button class="emoji-btn">😎</button>
+        <button class="emoji-btn">😢</button><button class="emoji-btn">😡</button>
+        <button class="emoji-btn">👍</button><button class="emoji-btn">👎</button>
+        <button class="emoji-btn">🙏</button><button class="emoji-btn">❤️</button>
+        <button class="emoji-btn">🔥</button><button class="emoji-btn">🎉</button>
+        <button class="emoji-btn">😊</button><button class="emoji-btn">😭</button>
+        <button class="emoji-btn">🤔</button><button class="emoji-btn">😴</button>
+        <button class="emoji-btn">🤣</button><button class="emoji-btn">😘</button>
+        <button class="emoji-btn">🥺</button><button class="emoji-btn">😏</button>
+        <button class="emoji-btn">👋</button><button class="emoji-btn">💪</button>
+        <button class="emoji-btn">🎶</button><button class="emoji-btn">🌟</button>
+        <button class="emoji-btn">💯</button><button class="emoji-btn">🍕</button>
+        <button class="emoji-btn">🎂</button><button class="emoji-btn">🚀</button>
+        <button class="emoji-btn">😆</button><button class="emoji-btn">🥰</button>
+      </div>
+      <div class="input-row">
+        <button class="emoji-toggle" onclick="toggleEmoji()">😊</button>
+        <div class="input-wrap">
+          <input type="text" id="msg-input" placeholder="Type a message"
+                 maxlength="2000" autocomplete="off">
+        </div>
+        <button class="send-btn" id="send-btn" onclick="sendMessage()">&#10148;</button>
+      </div>
+    </div>
+
+    {% else %}
+    <div class="empty-chat">
+      <!--<div class="icon">💬</div>-->
+      <h3>WhatsApp Web</h3>
+      <p>Select a chat or search for someone to start messaging</p>
+    </div>
+    {% endif %}
+
+  </div>
+</div>
+{% if other_user %}
+<script>
+  'use strict';
+
+  const MAX_LEN    = 2000;
+  const box        = document.getElementById('chat-box');
+  const statusEl   = document.getElementById('status-text');
+  const banner     = document.getElementById('conn-banner');
+  const sendBtn    = document.getElementById('send-btn');
+  const charCount  = document.getElementById('char-count');
+  const app        = document.getElementById('app');
+  const mobileBack = document.getElementById('mobile-back');
+
+  box.scrollTop = box.scrollHeight;
+
+  const me    = "{{ request.user.username|escapejs }}";
+  const other = "{{ other_user.username|escapejs }}";
+  const wsProtocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+
+  // ✅ Back button reloads home page
+  mobileBack && mobileBack.addEventListener('click', function(e) {
+    e.preventDefault();
+    window.location.href = '/';
+  });
+
+  function toggleEmoji() {
+    document.getElementById('emoji-bar').classList.toggle('open');
+  }
+  document.querySelectorAll('.emoji-btn').forEach(btn => {
+    btn.addEventListener('click', function () {
+      const input = document.getElementById('msg-input');
+      if ((input.value + this.textContent).length <= MAX_LEN)
+        input.value += this.textContent;
+      input.focus();
+      updateCharCount();
+    });
+  });
+  document.addEventListener('click', function(e) {
+    const bar = document.getElementById('emoji-bar');
+    if (!bar.contains(e.target) && !e.target.closest('.emoji-toggle'))
+      bar.classList.remove('open');
+  });
+
+  function updateCharCount() {
+    const input = document.getElementById('msg-input');
+    const rem   = MAX_LEN - input.value.length;
+    charCount.classList.remove('warn', 'over');
+    if (input.value.length === 0) {
+      charCount.textContent = '';
+      charCount.style.display = 'none';
+    } else if (rem < 0) {
+      charCount.textContent = `${Math.abs(rem)} over limit`;
+      charCount.classList.add('over');
+    } else if (rem < 200) {
+      charCount.textContent = `${rem} remaining`;
+      charCount.classList.add('warn');
+    } else {
+      charCount.textContent = '';
+      charCount.style.display = 'none';
+    }
+  }
+  document.getElementById('msg-input').addEventListener('input', updateCharCount);
+
+  let socket, reconnectTimer = null;
+
+  function connectWebSocket() {
+    socket = new WebSocket(`${wsProtocol}://${window.location.host}/ws/chat/${other}/`);
+
+    socket.onopen = () => { banner.classList.remove('show'); sendBtn.disabled = false; };
+
+    socket.onmessage = function(e) {
+      let data;
+      try { data = JSON.parse(e.data); } catch(_) { return; }
+
+      if (data.type === 'status') {
+        if (data.user === other)
+          statusEl.textContent = data.is_online ? '🟢 Online' : (data.last_seen || '⚫ Offline');
+        return;
+      }
+      if (data.type === 'error') { console.warn(data.error); return; }
+      if (data.type === 'read') {
+        if (data.reader === other)
+          document.querySelectorAll('.msg.sent .tick').forEach(t => {
+            t.textContent = '✓✓';
+            t.classList.add('read');
+          });
+        return;
+      }
+      if (data.type === 'message') {
+        const isMine = data.sender === me;
+        const div    = document.createElement('div');
+        div.className = 'msg ' + (isMine ? 'sent' : 'received');
+        div.setAttribute('data-id', String(parseInt(data.msg_id, 10) || 0));
+
+        if (!isMine) {
+          const n       = document.createElement('div');
+          n.className   = 'msg-name';
+          n.textContent = data.sender;
+          div.appendChild(n);
+        }
+
+        const content       = document.createElement('div');
+        content.className   = 'msg-content';
+        content.textContent = data.message;
+        div.appendChild(content);
+
+        const footer      = document.createElement('div');
+        footer.className  = 'msg-footer';
+
+        const ts           = document.createElement('span');
+        ts.className       = 'time';
+        ts.textContent     = data.timestamp || new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+        footer.appendChild(ts);
+
+        if (isMine) {
+          const tick           = document.createElement('span');
+          tick.className       = 'tick';
+          tick.textContent     = '✓';
+          tick.setAttribute('data-msg-id', data.msg_id);
+          footer.appendChild(tick);
+        }
+
+        div.appendChild(footer);
+        box.appendChild(div);
+        box.scrollTop = box.scrollHeight;
+      }
+    };
+
+    socket.onclose = () => {
+      statusEl.textContent = '⚫ Offline';
+      banner.classList.add('show');
+      sendBtn.disabled = true;
+      if (!reconnectTimer)
+        reconnectTimer = setTimeout(() => { reconnectTimer = null; connectWebSocket(); }, 3000);
+    };
+
+    socket.onerror = err => console.error('WS:', err);
+  }
+
+  connectWebSocket();
+
+  // Online status WS for sidebar
+  const onlineWs = new WebSocket(`${wsProtocol}://${window.location.host}/ws/online/`);
+  onlineWs.onmessage = function(e) {
+    let data;
+    try { data = JSON.parse(e.data); } catch(_) { return; }
+    if (data.type === 'status') {
+      if (data.user === other)
+        statusEl.textContent = data.is_online ? '🟢 Online' : (data.last_seen || '⚫ Offline');
+      document.querySelectorAll(`[data-user="${data.user}"]`).forEach(el => {
+        const dot = el.querySelector('.online-dot');
+        const st  = el.querySelector('.status');
+        if (dot) dot.className = 'online-dot ' + (data.is_online ? 'online' : '');
+        if (st) {
+          st.textContent = data.is_online ? '🟢 Online' : '⚫ Offline';
+          st.className   = 'contact-status status ' + (data.is_online ? 'online' : 'offline');
+        }
+      });
+    }
+  };
+
+  function sendMessage() {
+    const input = document.getElementById('msg-input');
+    const msg   = input.value.trim();
+    if (!msg) return;
+    if (msg.length > MAX_LEN) { alert(`Max ${MAX_LEN} chars.`); return; }
+    if (!socket || socket.readyState !== WebSocket.OPEN) { alert('Not connected.'); return; }
+    document.getElementById('emoji-bar').classList.remove('open');
+    socket.send(JSON.stringify({ message: msg, receiver: other }));
+    input.value = '';
+    charCount.textContent   = '';
+    charCount.style.display = 'none';
+  }
+
+  document.getElementById('msg-input').addEventListener('keypress', e => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+  });
+
+  window.visualViewport && window.visualViewport.addEventListener('resize', () => {
+    box.scrollTop = box.scrollHeight;
+  });
+
+  // ✅ Reload when user presses browser back button
+  window.addEventListener('popstate', function() {
+    window.location.href = '/';
+  });
+
+</script>
+{% endif %}
+</body>
+</html>

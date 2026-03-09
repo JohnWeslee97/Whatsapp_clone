@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>403 — Forbidden</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #f0f4f0;
+      position: relative;
+      overflow: hidden;
+    }
+    body::before {
+      content: '';
+      position: fixed;
+      width: 500px; height: 500px;
+      background: #f39c12;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.12;
+      top: -150px; left: -150px;
+      pointer-events: none;
+    }
+    body::after {
+      content: '';
+      position: fixed;
+      width: 400px; height: 400px;
+      background: #25D366;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.12;
+      bottom: -100px; right: -100px;
+      pointer-events: none;
+    }
+    .card {
+      background: white;
+      border-radius: 24px;
+      padding: 48px 40px;
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.08);
+      max-width: 420px;
+      width: 90%;
+      z-index: 1;
+      animation: slideUp 0.5s cubic-bezier(0.16,1,0.3,1) both;
+    }
+    @keyframes slideUp {
+      from { opacity:0; transform:translateY(24px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+    .code {
+      font-size: 80px;
+      font-weight: 700;
+      color: #f39c12;
+      line-height: 1;
+      letter-spacing: -4px;
+    }
+    .icon { font-size: 48px; margin: 12px 0; }
+    h2 {
+      font-size: 22px;
+      font-weight: 600;
+      color: #111b21;
+      margin-bottom: 10px;
+    }
+    p {
+      font-size: 14px;
+      color: #8696a0;
+      line-height: 1.6;
+      margin-bottom: 28px;
+    }
+    .btn {
+      display: inline-block;
+      background: #25D366;
+      color: white;
+      text-decoration: none;
+      padding: 12px 28px;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 500;
+      transition: background 0.2s, transform 0.1s;
+      box-shadow: 0 4px 16px rgba(37,211,102,0.35);
+    }
+    .btn:hover  { background: #128C7E; }
+    .btn:active { transform: scale(0.97); }
+    @media (max-width: 420px) {
+      .card { padding: 36px 24px; }
+      .code { font-size: 60px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="code">403</div>
+    <div class="icon">🔒</div>
+    <h2>Access Forbidden</h2>
+    <p>You don't have permission to access this page. Please log in first.</p>
+    <a href="/login/" class="btn">Go to Login</a>
+  </div>
+</body>
+</html>

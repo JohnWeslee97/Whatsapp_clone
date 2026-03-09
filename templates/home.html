@@ -1,0 +1,134 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WhatsApp — Chats</title>
+  <link rel="stylesheet" href="{% static 'css/home.css' %}">
+</head>
+<body>
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-left">
+      <h2>WhatsApp</h2>
+    </div>
+    <div class="header-right">
+      <!--<span class="logged-in-as">👋 {{ request.user.username }}</span>-->
+      <a href="/logout/" class="logout-btn">Logout</a>
+    </div>
+  </div>
+
+  <!-- SEARCH -->
+  <div class="search-wrap">
+    <form method="GET" action="/">
+      <div class="search-inner">
+        <span class="search-icon">🔍</span>
+        <input
+          type="text"
+          name="search"
+          placeholder="Search username..."
+          value="{{ search_query }}"
+          autocomplete="off"
+        >
+        <button type="submit" class="search-btn">Search</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- RESULTS -->
+  {% if search_query %}
+    <div class="section-title">Results for "{{ search_query }}"</div>
+    <div class="contact-list">
+      {% for item in search_results %}
+        <a href="/chat/{{ item.user.username }}/">
+          <div class="contact-card" data-user="{{ item.user.username }}">
+            <div class="avatar-wrap">
+              <div class="avatar">{{ item.user.username|first|upper }}</div>
+             <!-- <span class="status-dot {% if item.is_online %}online{% endif %}"></span>-->
+            </div>
+            <div class="user-info">
+              <div class="username">{{ item.user.username }}</div>
+              <div class="status-text {% if item.is_online %}online{% else %}offline{% endif %} status">
+                {% if item.is_online %} Online{% else %} Offline{% endif %}
+              </div>
+            </div>
+            <span class="arrow">›</span>
+          </div>
+        </a>
+      {% empty %}
+        <div class="empty-state">
+          <div class="empty-icon">🔎</div>
+          <p>No user found for<br><strong>"{{ search_query }}"</strong></p>
+        </div>
+      {% endfor %}
+    </div>
+
+  {% else %}
+    <div class="section-title">Recent Chats</div>
+    <div class="contact-list">
+      {% for item in recent_chats %}
+        <a href="/chat/{{ item.user.username }}/">
+          <div class="contact-card" data-user="{{ item.user.username }}">
+            <div class="avatar-wrap">
+              <div class="avatar">{{ item.user.username|first|upper }}</div>
+              <!--<span class="status-dot {% if item.is_online %}online{% endif %}"></span>-->
+            </div>
+            <div class="user-info">
+              <div class="username">{{ item.user.username }}</div>
+              <div class="status-text {% if item.is_online %}online{% else %}offline{% endif %} status">
+                {% if item.is_online %} Online{% else %} Offline{% endif %}
+              </div>
+            </div>
+            <span class="arrow">›</span>
+          </div>
+        </a>
+      {% empty %}
+        <div class="empty-state">
+          <div class="empty-icon"></div>
+          <p>No chats yet!<br>Search for a friend above 👆</p>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <script>
+    const wsProtocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+    const socket = new WebSocket(`${wsProtocol}://${window.location.host}/ws/online/`);
+
+    socket.onmessage = function(e) {
+      const data = JSON.parse(e.data);
+      if (data.type === 'status') {
+        document.querySelectorAll(`[data-user="${data.user}"]`).forEach(card => {
+          const statusEl = card.querySelector('.status');
+          if (statusEl) {
+            statusEl.textContent = data.is_online ? ' Online' : ' Offline';
+            statusEl.className   = 'status-text status ' + (data.is_online ? 'online' : 'offline');
+          }
+         
+        });
+        
+      }
+      // ✅ New message notification
+       if (data.type === 'new_message') {
+        const me = "{{ request.user.username }}";
+        if (data.receiver === me || data.sender === me)  {
+          const existing = document.querySelector(`[data-user="${data.sender}"]`);
+          if (existing) {
+            existing.style.background = '#d9fdd3';
+            existing.style.borderLeft = '4px solid #25D366';
+          } else {
+            location.reload();
+          }
+        }
+      }
+    };
+
+    socket.onclose = function() {
+      setTimeout(() => location.reload(), 3000);
+    };
+  </script>
+
+</body>
+</html>
