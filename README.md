@@ -36,43 +36,6 @@ A real-time chat application built with Django Channels and WebSockets, inspired
 
 TechnologyPurposeDjango 6.xBackend frameworkDjango ChannelsWebSocket supportDaphneASGI serverSQLiteDatabaseWhitenoiseStatic files (production)HTML / CSS / JSFrontend
 
-📁 Project Structure
-
-Whatsapp_clone/
-│
-├── manage.py
-├── Procfile                    ← Railway deployment
-├── requirements.txt
-├── .gitignore
-├── README.md
-│
-├── Whatsapp_clone/             ← Project settings
-│   ├── settings.py
-│   ├── urls.py
-│   ├── asgi.py
-│   └── wsgi.py
-│
-├── chat/                       ← Main app
-│   ├── models.py               ← Message, Profile models
-│   ├── views.py                ← All views
-│   ├── consumers.py            ← WebSocket consumers
-│   ├── routing.py              ← WebSocket URL routing
-│   ├── admin.py                ← Admin configuration
-│   ├── urls.py                 ← App URLs
-│   └── static/
-│       └── css/
-│           ├── auth.css        ← Login + Register styles
-│           ├── home.css        ← Home page styles
-│           └── chat.css        ← Chat page styles
-│
-└── templates/                  ← HTML templates
-    ├── login.html
-    ├── register.html
-    ├── home.html
-    ├── chat.html
-    ├── 404.html
-    ├── 500.html
-    └── 403.html
 
 ⚙️ Local Installation
 
