@@ -1,1 +1,0 @@
-web: python manage.py migrate && python manage.py collectstatic --noinput && daphne -b 0.0.0.0 -p $PORT Whatsapp_clone.asgi:application
