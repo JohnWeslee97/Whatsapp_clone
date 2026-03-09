@@ -55,24 +55,21 @@ bash# Windows
 
 .venv\Scripts\activate
 
-# Mac / Linux
-source .venv/bin/activate
-
 Step 4 — Install all dependencies
 
-bashpip install -r requirements.txt
+bash : pip install -r requirements.txt
 
 Step 5 — Run migrations
 
-bashpython manage.py migrate
+bash : python manage.py migrate
 
 Step 6 — Create superuser (for admin panel)
 
-bashpython manage.py createsuperuser
+bash : python manage.py createsuperuser
 
 Step 7 — Run the server
 
-bashpython -m daphne -p 8000 Whatsapp_clone.asgi:application
+bash : python -m daphne -p 8000 Whatsapp_clone.asgi:application
 
 Step 8 — Open in browser
 
