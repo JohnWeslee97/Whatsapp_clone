@@ -1,167 +1,129 @@
-A real-time chat application built with Django Channels and WebSockets, inspired by WhatsApp Web. Features instant messaging, online/offline status, read receipts, and a clean responsive UI.
+# WhatsApp Clone
 
+A real-time chat application built with Django Channels and WebSockets, inspired by WhatsApp Web. It supports instant messaging, online/offline status, read receipts, emoji picker, user search, and a fully responsive mobile layout.
 
+---
 
-✨ Features
+## Features
 
-🔐 User Authentication (Register / Login / Logout)
+This project includes user authentication with register, login, and logout. Messages are sent and received in real time using WebSockets without any page refresh. It shows read receipts — a single tick when the message is sent, a double tick when the receiver is online, and a double blue tick when the receiver reads the message. Users can see each other's online or offline status along with the last seen time. There is also an emoji picker, user search to start new chats, auto reconnect on connection loss, custom error pages for 404, 500, and 403, and an admin panel to manage users, messages, and profiles.
 
-💬 Real-time messaging using WebSockets
+---
 
-✅ Read receipts
+## Tech Stack
 
-✓ — Message sent (receiver offline)
+The backend is built with Django 6 and Django Channels for WebSocket support. Daphne is used as the ASGI server. SQLite is used as the database. Whitenoise serves static files in production. The frontend uses plain HTML, CSS, and JavaScript.
 
-✓✓ — Message delivered (receiver online)
+---
 
-✓✓ 🔵 — Message read (receiver opened chat)
+## Local Installation
 
+First clone the repository and navigate into the project folder.
 
-🟢 Online / Offline status with last seen
+```bash
+git clone https://github.com/JohnWeslee97/Whatsapp_clone.git
+cd Whatsapp_clone
+```
 
-😊 Emoji picker
+Create and activate a virtual environment.
 
-🔍 Search users
+```bash
+python -m venv .venv
 
-📱 Mobile responsive (WhatsApp Web style)
-
-🔄 Auto reconnect on connection loss
-
-🛡️ Custom error pages (404, 500, 403)
-
-👨‍💼 Admin panel
-
-
-🛠️ Tech Stack
-
-TechnologyPurposeDjango 6.xBackend frameworkDjango ChannelsWebSocket supportDaphneASGI serverSQLiteDatabaseWhitenoiseStatic files (production)HTML / CSS / JSFrontend
-
-
-⚙️ Local Installation
-
-Step 1 — Clone the repository
-
-bashgit clone https://github.com/YOUR_USERNAME/whatsapp-clone.git
-
-cd whatsapp-clone
-
-Step 2 — Create virtual environment
-
-bashpython -m venv .venv
-
-Step 3 — Activate virtual environment
-
-bash# Windows
-
+# Windows
 .venv\Scripts\activate
 
-Step 4 — Install all dependencies
+# Mac / Linux
+source .venv/bin/activate
+```
 
-bash : pip install -r requirements.txt
+Install all dependencies from requirements.txt.
 
-Step 5 — Run migrations
+```bash
+pip install -r requirements.txt
+```
 
-bash : python manage.py migrate
+Run the database migrations.
 
-Step 6 — Create superuser (for admin panel)
+```bash
+python manage.py migrate
+```
 
-bash : python manage.py createsuperuser
+Create a superuser to access the admin panel.
 
-Step 7 — Run the server
+```bash
+python manage.py createsuperuser
+```
 
-bash : python -m daphne -p 8000 Whatsapp_clone.asgi:application
+Start the server using Daphne.
 
-Step 8 — Open in browser
+```bash
+python -m daphne -p 8000 Whatsapp_clone.asgi:application
+```
 
-http://127.0.0.1:8000
+Open your browser and go to http://127.0.0.1:8000 to use the app.
 
-🔑 Environment Variables
+---
 
-VariableDescriptionDefault (local)SECRET_KEYDjango secret keyinsecure fallback keyDEBUGDebug modeTrueALLOWED_HOSTSAllowed hosts*DB_PATHSQLite database pathdb.sqlite3 (project root)CSRF_TRUSTED_ORIGINSTrusted origins for CSRFyour Railway domain
+## Deploying on Railway
 
-🚀 Deploy on Railway
+Push your code to GitHub first. Then go to railway.app and login with your GitHub account. Create a new project and select deploy from GitHub repo. Choose your repository and wait for the build to complete.
 
-Step 1 — Push to GitHub
+Add a Volume to store the SQLite database. Set the mount path to /data and size to 1 GB. Then go to the Variables tab and add the following environment variables.
 
-bashgit add .
-
-git commit -m "initial commit"
-
-git push
-
-Step 2 — Create Railway project
-
-Go to railway.app
-
-Login with GitHub
-
-Click New Project → Deploy from GitHub repo
-
-Select your repository
-
-Wait for build to complete
-
-Step 3 — Add Volume (persistent SQLite storage)
-
-In your project click + New → Volume
-
-Set Mount Path: /data
-
-Set Size: 1 GB
-
-Click Create
-
-Step 4 — Set Environment Variables
-
-Go to your service → Variables tab and add:
-
-SECRET_KEY            → generate with command below
-
+```
+SECRET_KEY            → your generated secret key
 DEBUG                 → False
-
 ALLOWED_HOSTS         → your-app.up.railway.app
-
 DB_PATH               → /data/db.sqlite3
-
 CSRF_TRUSTED_ORIGINS  → https://your-app.up.railway.app
+```
 
-Generate a secret key:
+To generate a secure secret key run this command and copy the output.
 
-bashpython -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
+```bash
+python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
+```
 
-Step 5 — Set Replicas to 1
+Go to the Settings tab and set Replicas to 1. This is important because InMemoryChannelLayer only works with exactly one server instance. Then go to Networking and click Generate Domain to get your app URL. Update ALLOWED_HOSTS and CSRF_TRUSTED_ORIGINS with your domain.
 
-Settings tab → Replicas → set to 1
+To create a superuser on Railway, open the Shell tab in your service and run python manage.py createsuperuser. Once done, visit your app at https://your-app.up.railway.app/login/.
 
-⚠️ Important: InMemoryChannelLayer only works with 1 instance
+---
 
-Step 6 — Generate Domain
+## Admin Panel
 
-Settings tab → Networking → Generate Domain
+The admin panel is available at /admin/ on both local and production. Login with your superuser credentials to manage users, messages, and profiles.
 
-Copy your domain e.g. your-app.up.railway.
+---
 
-Update ALLOWED_HOSTS and CSRF_TRUSTED_ORIGINS with this domain
+## Common Issues
 
-Step 7 — Create superuser on Railway
+If CSS is not loading locally, make sure DEBUG is set to True in settings.py. Django only serves static files automatically in debug mode.
 
-Go to Railway dashboard
+If WebSocket connection fails on Railway, make sure Replicas is set to 1, ALLOWED_HOSTS includes your Railway domain, and CSRF_TRUSTED_ORIGINS includes your full https domain.
 
-Click your service → Shell tab
-Run:
+If you see a 403 CSRF error, add your Railway domain to CSRF_TRUSTED_ORIGINS in settings.py.
 
-bashpython manage.py createsuperuser
+If the database is not working on Railway, make sure the Volume is attached with mount path /data and DB_PATH is set to /data/db.sqlite3 in the Variables tab.
 
-Step 8 — Visit your app
+---
 
-https://your-app.up.railway.app/login/
+## Known Limitations
 
-👨‍💼 Admin Panel
+This project uses InMemoryChannelLayer which only works with one server instance. SQLite is not recommended for high traffic applications. For a production-ready setup with multiple users, switching to PostgreSQL and Redis is recommended.
 
-Local:    http://127.0.0.1:8000/admin/
+---
 
-Railway:  https://your-app.up.railway.app/admin/
+## Future Improvements
 
+Typing indicator, profile pictures, message delete and edit, group chat, push notifications, and PostgreSQL with Redis support are planned for future versions.
+
+---
+
+## License
+
+MIT License — free to use and modify.
 Login with your superuser credentials to manage:
 
 👥 Users
